@@ -1,5 +1,6 @@
 module Lists where
-import Control.Monad.Random (Rand, StdGen, evalRandIO, getRandom)
+import Control.Monad.Random ( Rand, StdGen, evalRandIO, getRandom )
+import Data.List ( permutations, sort, sortBy )
 
 -- Problem 1
 myLast :: [a] -> a
@@ -161,6 +162,40 @@ diff_select n m = evalRandIO $ take n <$> randomPermute [1..m]
 rnd_permu :: [a] -> IO [a]
 rnd_permu = evalRandIO . randomPermute
 
--- Problem 26: TODO
+-- Problem 26
 combinations :: Int -> [a] -> [[a]]
-combinations n xs = undefined
+combinations 0 _ = []
+combinations 1 (x:xs) = [x] : combinations 1 xs
+combinations n (x:xs) =
+    map (x:) (combinations (n - 1) xs)
+    ++ combinations n xs
+combinations _ [] = []
+
+-- Problem 27
+splitBy :: [Int] -> [a] -> [[a]]
+splitBy [] _ = []
+splitBy _ [] = []
+splitBy (size:rest) elements =
+    take size elements : splitBy rest (drop size elements)
+
+group :: Ord a => [Int] -> [a] -> [[[a]]]
+group sizes elements
+    | sum sizes /= length elements = undefined
+    | otherwise =
+        compress
+        $ sort
+        $ map (map sort . splitBy sizes)
+        $ permutations elements
+
+-- Problem 28
+lsort :: Ord a => [[a]] -> [[a]]
+lsort xs = map snd $ sort (zip (map length xs) xs)
+
+count :: (a -> Bool) -> [a] -> Int
+count f = length . filter id . map f
+
+lfsort :: Ord a => [[a]] -> [[a]]
+lfsort xs =
+    map snd
+    $ sort
+    $ zip (map (\x -> count (\y -> length y == length x) xs) xs) xs
