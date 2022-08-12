@@ -87,9 +87,12 @@ buildHuffmanTree :: [Tree (Integer, Char)] -> Tree (Integer, Char)
 buildHuffmanTree [] = undefined
 buildHuffmanTree [x] = x
 buildHuffmanTree (x:y:rest) =
-    buildHuffmanTree $ sort (Node x (xn + yn, '*') y : rest)
+    buildHuffmanTree $ sort (newTree : rest)
         where (xn, _) = value x
               (yn, _) = value y
+              xLess = Node x (xn + yn, '*') y
+              yLess = Node y (xn + yn, '*') y
+              newTree = if xn > yn then yLess else xLess
 
 collapseHuffmanTree :: Tree (Integer, Char) -> [(Char, String)]
 collapseHuffmanTree (Leaf (_, char)) = [(char, "")]
