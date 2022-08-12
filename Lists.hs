@@ -161,6 +161,6 @@ diff_select n m = evalRandIO $ take n <$> randomPermute [1..m]
 rnd_permu :: [a] -> IO [a]
 rnd_permu = evalRandIO . randomPermute
 
--- Problem 26
+-- Problem 26: TODO
 combinations :: Int -> [a] -> [[a]]
 combinations n xs = undefined
