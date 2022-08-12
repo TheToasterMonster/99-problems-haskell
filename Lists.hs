@@ -1,5 +1,5 @@
 module Lists where
-import Control.Monad.Random (Rand, StdGen, evalRandIO, getRandom, evalRand)
+import Control.Monad.Random (Rand, StdGen, evalRandIO, getRandom)
 
 -- Problem 1
 myLast :: [a] -> a
