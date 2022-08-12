@@ -68,9 +68,6 @@ gray n = map ('0':) rest ++ map ('1':) (reverse rest)
     where rest = gray (n - 1)
 
 -- Problem 50
-createHuffmanQueue :: [(Char, Integer)] -> [Tree (Integer, Char)]
-createHuffmanQueue = map Leaf . sort . map swap
-
 data Tree a = Node { left :: Tree a, value :: a, right :: Tree a }
             | Leaf { value :: a }
     deriving Show
@@ -82,6 +79,9 @@ instance Eq a => Eq (Tree a) where
 
 instance Ord a => Ord (Tree a) where
     compare lhs rhs = compare (value lhs) (value rhs)
+
+createHuffmanQueue :: [(Char, Integer)] -> [Tree (Integer, Char)]
+createHuffmanQueue = map Leaf . sort . map swap
 
 buildHuffmanTree :: [Tree (Integer, Char)] -> Tree (Integer, Char)
 buildHuffmanTree [] = undefined
