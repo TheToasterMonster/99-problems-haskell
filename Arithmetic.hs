@@ -1,5 +1,5 @@
 module Arithmetic where
-import Lists
+import Lists ( encode )
 
 -- Problem 31
 isPrime :: Integer -> Bool
