@@ -16,29 +16,29 @@ saturated (Branch _ Empty _) = False
 saturated (Branch _ _ Empty) = False
 saturated (Branch _ left right) = saturated left && saturated right
 
-height :: Tree a -> Integer
-height Empty = 0
-height (Branch _ left right) = max (height left) (height right) + 1
+count :: Tree a -> Integer
+count Empty = 0
+count (Branch _ left right) = count left + height right + 1
 
-insert :: a -> Tree a -> [Tree a]
-insert x Empty = [leaf x]
-insert x (Branch val Empty Empty) = concatMap
+insertBy :: a -> (Tree a -> Integer) -> Tree a -> [Tree a]
+insertBy x f Empty = [leaf x]
+insertBy x f (Branch val Empty Empty) = concatMap
     (\tree -> [Branch val tree Empty, Branch val Empty tree])
-    (insert x Empty)
-insert x (Branch val Empty right) = map
+    (insertBy x f Empty)
+insertBy x f (Branch val Empty right) = map
     (\tree -> Branch val tree right)
-    (insert x Empty)
-insert x (Branch val left Empty) = map
+    (insertBy x f Empty)
+insertBy x f (Branch val left Empty) = map
     (Branch val left)
-    (insert x Empty)
-insert x (Branch val left right)
-    | (height left < height right) || not (saturated left) =
-        map (\tree -> Branch val tree right) (insert x left)
-    | (height right < height left) || not (saturated right) =
-        map (Branch val left) (insert x right)
+    (insertBy x f Empty)
+insertBy x f (Branch val left right)
+    | (f left < f right) || not (saturated left) =
+        map (\tree -> Branch val tree right) (insertBy x f left)
+    | (f right < f left) || not (saturated right) =
+        map (Branch val left) (insertBy x f right)
     | otherwise =
-        map (\tree -> Branch val tree right) (insert x left)
-        ++ map (Branch val left) (insert x right)
+        map (\tree -> Branch val tree right) (insertBy x f left)
+        ++ map (Branch val left) (insertBy x f right)
 
 instance Ord a => Ord (Tree a) where
     Empty <= _ = True
@@ -52,7 +52,7 @@ cbalTree :: Integer -> [Tree Char]
 cbalTree 0 = [Empty]
 cbalTree n = compress
     $ sort
-    $ concatMap (insert 'x') (cbalTree (n - 1))
+    $ concatMap (insertBy 'x' count) (cbalTree (n - 1))
 
 -- Problem 56
 xify :: Tree a -> Tree Char
@@ -83,3 +83,37 @@ construct = foldl add Empty
 -- Problem 58
 symCbalTrees :: Integer -> [Tree Char]
 symCbalTrees = filter symmetric . cbalTree
+
+-- Problem 59
+height :: Tree a -> Integer
+height Empty = 0
+height (Branch _ left right) = max (height left) (height right) + 1
+
+balTree :: Ord a => a -> Integer -> [Tree a]
+balTree val 0 = [Empty]
+balTree val n = compress
+    $ sort
+    $ concatMap (insertBy val count) (balTree val (n - 1))
+
+hbalTree :: Ord a => a -> Integer -> [Tree a]
+hbalTree _ 0 = [Empty]
+hbalTree val n = concatMap (balTree val) [2^(n - 1)..2^n - 1]
+
+-- Problem 60
+minNodes :: Integer -> Integer
+minNodes h
+    | h < 1 = 0
+    | otherwise = 1 + minNodes (h - 1) + minNodes(h - 2)
+
+binSearch :: (Integer -> Bool) -> Integer -> Integer -> Integer
+binSearch lessThanEq l r
+    | l >= r = l - 1
+    | lessThanEq mid = binSearch lessThanEq (mid + 1) r
+    | otherwise = binSearch lessThanEq l mid
+    where mid = l + (r - l) `div` 2
+
+maxHeight :: Integer -> Integer
+maxHeight n = binSearch (\h -> minNodes h <= n) 0 n
+
+hbalTreeNodes :: Ord a => a -> Integer -> [Tree a]
+hbalTreeNodes val n = compress $ sort $ concatMap (hbalTree val) [floor (logBase 2 (fromIntegral n)) + 1..maxHeight n]
